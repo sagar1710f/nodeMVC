@@ -13,13 +13,13 @@ exports.postAddProduct = (req, res, next) => {
   const imageurl = req.body.imageurl;
   const price = req.body.price;
   const description = req.body.description;
-  Product.create({
-    title: title,
-    price: price,
-    imageurl: imageurl,
-    description: description,
-    userId: req.user.id,
-  })
+  req.user
+    .createProduct({
+      title: title,
+      price: price,
+      imageurl: imageurl,
+      description: description,
+    })
     .then((result) => {
       console.log("Created Product");
       // console.log(result);
@@ -36,8 +36,11 @@ exports.getEditProduct = (req, res, next) => {
     return res.redirect("/");
   }
   const prodId = req.params.productId;
-  Product.findByPk(prodId)
-    .then((product) => {
+  // Product.findByPk(prodId)
+  req.user
+    .getProducts({ where: { id: prodId } })
+    .then((products) => {
+      const product = products[0];
       if (!product) {
         return res.redirect("/");
       }

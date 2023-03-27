@@ -14,6 +14,10 @@ const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 const Product = require("./models/product");
 const User = require("./models/user");
+const Cart = require("./models/cart");
+const CartItem = require("./models/cart-item");
+const Order = require("./models/order");
+const OrderItem = require("./models/order-item");
 // db.execute("select * from products")
 // .then((result) => {
 //   console.log(result[0]);
@@ -41,6 +45,14 @@ app.use(errorController.get404);
 
 Product.belongsTo(User, { constraints: true, onDelete: "CASCADE" });
 User.hasMany(Product);
+User.hasOne(Cart);
+Cart.belongsTo(User);
+Cart.belongsToMany(Product, { through: CartItem });
+Product.belongsToMany(Cart, { through: CartItem });
+Order.belongsTo(User);
+User.hasMany(Order);
+Order.belongsToMany(Product, { through: OrderItem });
+
 sequelize
   // .sync({ force: true }) // Force Create new tables
   .sync()
@@ -52,6 +64,9 @@ sequelize
       return User.create({ name: "Sagar", email: "abc@gmail.com" });
     }
     return result;
+  })
+  .then((result) => {
+    return result.createCart();
   })
   .then((result) => {
     // console.log(result);
